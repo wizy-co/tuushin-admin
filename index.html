@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>通信管理</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+  :root { --teal:#0a6b5a; --teal-dark:#075043; --bg:#f4f6f5; --card:#fff; --tx:#182020; --sub:#6e7874; --bd:#d8e2de; --danger:#b3261e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif; background:var(--bg); color:var(--tx); }
+  header { background:var(--teal); color:#fff; padding:16px 20px; }
+  header .app { font-size:12px; opacity:.85; letter-spacing:.08em; }
+  header h1 { margin:2px 0 0; font-size:22px; }
+  main { padding:16px; max-width:640px; margin:0 auto; }
+  .desc { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:16px; font-size:15px; line-height:1.7; white-space:pre-line; }
+  .btn { display:block; width:100%; margin-top:16px; padding:16px; font-size:17px; font-weight:700; color:#fff; background:var(--teal); border:none; border-radius:12px; cursor:pointer; }
+  .btn:active { background:var(--teal-dark); }
+  .btn.sub { background:#fff; color:var(--teal); border:2px solid var(--teal); }
+  .btn.danger { background:var(--danger); }
+  .btn:disabled { opacity:.5; }
+  .item { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:14px 16px; margin-top:12px; }
+  .item .t { font-weight:700; font-size:16px; }
+  .item .d { color:var(--sub); font-size:13px; margin-top:4px; line-height:1.6; white-space:pre-line; }
+  .row { display:flex; gap:10px; margin-top:12px; }
+  .row .btn { margin-top:0; flex:1; padding:12px; font-size:15px; }
+  .done { text-align:center; padding:40px 16px; }
+  .done .big { font-size:20px; font-weight:700; margin-bottom:8px; }
+  .done .small { color:var(--sub); font-size:14px; line-height:1.7; }
+  .err { background:#fdecea; color:var(--danger); border-radius:12px; padding:14px 16px; font-size:14px; line-height:1.6; margin-top:12px; display:none; }
+  .nav a { display:block; background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:16px; margin-top:12px; color:var(--tx); text-decoration:none; font-weight:700; }
+  .nav a span { display:block; color:var(--sub); font-weight:400; font-size:13px; margin-top:2px; }
+  input.code { width:100%; font-size:24px; letter-spacing:.4em; text-align:center; padding:12px; border:2px solid var(--bd); border-radius:12px; margin-top:12px; }
+  .cur { text-align:center; font-size:15px; color:var(--sub); margin-top:12px; }
+  .cur b { color:var(--tx); font-size:22px; letter-spacing:.3em; }
+  .loading { text-align:center; color:var(--sub); padding:32px 0; }
+</style>
+</head>
+<body>
+<header><div class="app">Wizy_通信管理</div><h1 id="title">読み込み中</h1></header>
+<main id="main"><div class="loading">読み込み中です…</div></main>
+
+<script>
+var LIFF_ID = '2012818949-48Ow8t6C';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbyxAnGs-go4mN5e6BDJrkDdLvnunEw6T0OEF_vpRrPP5bE7pCQ9LZMQViS4TdqS6_Gi/exec';
+var page = new URLSearchParams(location.search).get('p') || 'today';
+var idToken = null;
+
+var PAGES = {
+  today:      { title:'報告状況', desc:'今日の実績報告を集計して、LINEに結果を送ります。\n誰が・どこで・合計何件報告したかが届きます。', runLabel:'今日の報告状況を送る' },
+  unreported: { title:'未報告者', desc:'今日のシフトで稼働予定の人のうち、まだ実績報告が来ていない人を調べて、LINEに結果を送ります。', runLabel:'未報告者を調べる' },
+  monthly:    { title:'今月の集計', desc:'今月（月初から今この時点まで）の実績報告を集計して、LINEに結果を送ります。\n個人別の合計ランキングが届きます。', runLabel:'今月の集計を送る' },
+  quota:      { title:'通数残量', desc:'各公式LINEの今月の送信通数と残りを確認して、LINEに結果を送ります。', runLabel:'通数残量を送る' },
+  approvals:  { title:'承認待ち', desc:'シート作成などの承認待ち一覧です。\n「承認する」を押すと実行され、結果がLINEに届きます。' },
+  applications:{ title:'管理者申請の確認', desc:'管理者登録の申請一覧です。\n「承認する」を押すと、その人が管理者として登録されます。結果はLINEに届きます。' },
+  admins:     { title:'管理者一覧', desc:'登録中の管理者です。\n他の管理者の登録を解除できます（確認画面が出ます）。結果はLINEに届きます。' },
+  regcode:    { title:'登録コード', desc:'管理者登録に使う6桁のコードです。\n新しいコードに変更すると、結果がLINEに届きます。会社内の管理者だけに共有してください。' },
+  settings:   { title:'使い方・設定', desc:'各機能への移動と、自分の管理者登録の解除ができます。' },
+  help:       { title:'詳しい使い方', desc:'使い方の説明文を、LINEに送ります。', runLabel:'使い方を送る' },
+  unregister: { title:'自分の登録を解除', desc:'あなたの管理者登録を解除します。\n解除すると管理メニューが使えなくなり、管理系の通知も届かなくなります。\n再登録には登録コードと、他の管理者の承認が必要です。' }
+};
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function main(html){ document.getElementById('main').innerHTML = html; }
+function errHtml(msg){ return '<div class="err" style="display:block">' + esc(msg) + '</div>'; }
+
+async function api(payload){
+  payload.idToken = idToken;
+  var res = await fetch(GAS_URL, { method:'POST', body: JSON.stringify(payload) });
+  return await res.json();
+}
+function donePanel(note){
+  main('<div class="done"><div class="big">完了しました</div><div class="small">' + esc(note || '結果をLINEに送りました。') + '</div></div>'
+     + '<button class="btn" onclick="closePage()">閉じる</button>');
+}
+function closePage(){ if (window.liff && liff.isInClient()) liff.closeWindow(); else window.close(); }
+
+async function runAction(){
+  var btn = document.getElementById('runBtn');
+  btn.disabled = true; btn.textContent = '実行中…';
+  try {
+    var r = await api({ action:'run', page: page });
+    if (!r.ok) { main(errHtml(r.error || '実行に失敗しました')); return; }
+    donePanel('結果をLINEに送りました。トーク画面で確認してください。');
+  } catch(e){ main(errHtml('通信に失敗しました。もう一度お試しください。')); }
+}
+
+function renderRun(){
+  var p = PAGES[page];
+  main('<div class="desc">' + esc(p.desc) + '</div>'
+     + '<button class="btn" id="runBtn" onclick="runAction()">' + esc(p.runLabel) + '</button>');
+}
+
+async function renderApprovals(){
+  main('<div class="desc">' + esc(PAGES.approvals.desc) + '</div><div id="list"><div class="loading">読み込み中です…</div></div>');
+  var r = await api({ action:'load', page:'approvals' });
+  if (!r.ok) { document.getElementById('list').innerHTML = errHtml(r.error); return; }
+  drawApprovals(r.data.items);
+}
+function drawApprovals(items){
+  var el = document.getElementById('list');
+  if (!items || items.length === 0) { el.innerHTML = '<div class="desc" style="margin-top:12px">承認待ちはありません。</div>'; return; }
+  el.innerHTML = items.map(function(it){
+    return '<div class="item"><div class="t">' + esc(it.kind) + '：' + esc(it.target) + '</div>'
+      + '<div class="d">' + esc(it.content) + '\n期限：' + esc(it.deadline) + 'まで</div>'
+      + '<div class="row"><button class="btn" onclick="decideApproval(' + it.no + ',true,this)">承認する</button>'
+      + '<button class="btn sub" onclick="decideApproval(' + it.no + ',false,this)">却下する</button></div></div>';
+  }).join('');
+}
+async function decideApproval(no, ok, btn){
+  btn.disabled = true; btn.textContent = '処理中…';
+  var r = await api({ action: ok ? 'approve' : 'reject', id: no });
+  if (!r.ok) { alert(r.error || '処理に失敗しました'); btn.disabled = false; return; }
+  drawApprovals(r.data.items);
+}
+
+async function renderApplications(){
+  main('<div class="desc">' + esc(PAGES.applications.desc) + '</div><div id="list"><div class="loading">読み込み中です…</div></div>');
+  var r = await api({ action:'load', page:'applications' });
+  if (!r.ok) { document.getElementById('list').innerHTML = errHtml(r.error); return; }
+  drawApplications(r.data.items);
+}
+function drawApplications(items){
+  var el = document.getElementById('list');
+  if (!items || items.length === 0) { el.innerHTML = '<div class="desc" style="margin-top:12px">承認待ちの申請はありません。</div>'; return; }
+  el.innerHTML = items.map(function(it){
+    return '<div class="item"><div class="t">' + esc(it.name) + ' さん</div>'
+      + '<div class="d">申請日時：' + esc(it.date) + '</div>'
+      + '<div class="row"><button class="btn" onclick="decideApplication(' + it.no + ',true,this)">承認する</button>'
+      + '<button class="btn sub" onclick="decideApplication(' + it.no + ',false,this)">却下する</button></div></div>';
+  }).join('');
+}
+async function decideApplication(no, ok, btn){
+  btn.disabled = true; btn.textContent = '処理中…';
+  var r = await api({ action: ok ? 'admin_approve' : 'admin_reject', id: no });
+  if (!r.ok) { alert(r.error || '処理に失敗しました'); btn.disabled = false; return; }
+  drawApplications(r.data.items);
+}
+
+async function renderAdmins(){
+  main('<div class="desc">' + esc(PAGES.admins.desc) + '</div><div id="list"><div class="loading">読み込み中です…</div></div>');
+  var r = await api({ action:'load', page:'admins' });
+  if (!r.ok) { document.getElementById('list').innerHTML = errHtml(r.error); return; }
+  drawAdmins(r.data.items);
+}
+function drawAdmins(items){
+  var el = document.getElementById('list');
+  el.innerHTML = items.map(function(it){
+    var btn = it.self ? '<div class="d">（あなた）</div>'
+      : '<div class="row"><button class="btn sub" onclick="removeAdmin(this,\'' + it.userId + '\')">登録を解除する</button></div>';
+    return '<div class="item"><div class="t">' + esc(it.name) + ' さん</div>' + btn + '</div>';
+  }).join('');
+}
+async function removeAdmin(btn, uid){
+  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '本当に解除しますか？（もう一度タップで実行）'; btn.classList.add('danger'); btn.classList.remove('sub'); return; }
+  btn.disabled = true; btn.textContent = '処理中…';
+  var r = await api({ action:'admin_remove', uid: uid });
+  if (!r.ok) { alert(r.error || '処理に失敗しました'); return; }
+  drawAdmins(r.data.items);
+}
+
+async function renderRegcode(){
+  main('<div class="desc">' + esc(PAGES.regcode.desc) + '</div><div id="list"><div class="loading">読み込み中です…</div></div>');
+  var r = await api({ action:'load', page:'regcode' });
+  if (!r.ok) { document.getElementById('list').innerHTML = errHtml(r.error); return; }
+  document.getElementById('list').innerHTML =
+      '<div class="cur">現在の登録コード<br><b>' + esc(r.data.code) + '</b></div>'
+    + '<input class="code" id="newCode" type="tel" inputmode="numeric" maxlength="6" placeholder="新しい6桁">'
+    + '<button class="btn" onclick="changeRegcode(this)">このコードに変更する</button>';
+}
+async function changeRegcode(btn){
+  var code = document.getElementById('newCode').value.trim();
+  if (!/^\d{6}$/.test(code)) { alert('6桁の数字で入力してください'); return; }
+  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '本当に変更しますか？（もう一度タップで実行）'; return; }
+  btn.disabled = true; btn.textContent = '処理中…';
+  var r = await api({ action:'regcode_change', code: code });
+  if (!r.ok) { alert(r.error || '処理に失敗しました'); btn.disabled = false; return; }
+  donePanel('新しい登録コードをLINEに送りました。');
+}
+
+function renderSettings(){
+  var base = 'https://liff.line.me/' + LIFF_ID + '?p=';
+  main('<div class="desc">' + esc(PAGES.settings.desc) + '</div><div class="nav">'
+    + '<a href="' + base + 'admins">管理者一覧<span>登録中の管理者の確認と解除</span></a>'
+    + '<a href="' + base + 'regcode">登録コード<span>現在の確認と変更</span></a>'
+    + '<a href="' + base + 'help">詳しい使い方<span>説明文をLINEに送る</span></a>'
+    + '<a href="' + base + 'unregister">自分の登録を解除<span>管理者をやめる</span></a>'
+    + '</div>');
+}
+
+function renderUnregister(){
+  main('<div class="desc">' + esc(PAGES.unregister.desc) + '</div>'
+     + '<button class="btn danger" id="unregBtn" onclick="doUnregister(this)">登録を解除する</button>');
+}
+async function doUnregister(btn){
+  if (btn.dataset.confirm !== '1') { btn.dataset.confirm = '1'; btn.textContent = '本当に解除しますか？（もう一度タップで実行）'; return; }
+  btn.disabled = true; btn.textContent = '処理中…';
+  var r = await api({ action:'unregister' });
+  if (!r.ok) { main(errHtml(r.error || '処理に失敗しました')); return; }
+  donePanel('解除の結果をLINEに送りました。');
+}
+
+async function init(){
+  var p = PAGES[page] || PAGES.today;
+  document.getElementById('title').textContent = p.title;
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    idToken = liff.getIDToken();
+  } catch(e) {
+    main(errHtml('LINEからの起動を確認できませんでした。公式LINEのメニューから開き直してください。'));
+    return;
+  }
+  if (page === 'approvals') renderApprovals();
+  else if (page === 'applications') renderApplications();
+  else if (page === 'admins') renderAdmins();
+  else if (page === 'regcode') renderRegcode();
+  else if (page === 'settings') renderSettings();
+  else if (page === 'unregister') renderUnregister();
+  else renderRun();
+}
+init();
+</script>
+</body>
+</html>
