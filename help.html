@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>使い方ガイド｜Wizy_通信管理者用</title>
+<style>
+:root { --teal:#0a6b5a; --teal-dark:#075043; --teal-soft:#e6f2ee; --bg:#f4f6f5; --card:#fff; --tx:#182020; --sub:#5f6a66; --bd:#d8e2de; --amber:#9a6a00; --amber-bg:#fdf3e0;}
+* { box-sizing: border-box;}
+body { margin:0; font-family:"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif; background:var(--bg); color:var(--tx); line-height:1.75;}
+header { background:var(--teal); color:#fff; padding:22px 20px 18px;}
+header.app { font-size:12px; opacity:.85; letter-spacing:.08em;}
+header h1 { margin:2px 0 4px; font-size:23px;}
+header p { margin:0; font-size:13px; opacity:.92;}
+main { padding:16px; max-width:680px; margin:0 auto;}
+h2 { font-size:18px; margin:28px 0 10px; padding-left:10px; border-left:5px solid var(--teal);}
+h2:first-of-type { margin-top:8px;}
+.card { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:16px; margin-top:12px;}
+.card h3 { margin:0 0 6px; font-size:16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.pill { display:inline-block; font-size:11px; font-weight:700; color:var(--teal-dark); background:var(--teal-soft); border-radius:999px; padding:2px 10px;}
+.pill.gray { color:#444; background:#eceeed;}
+.about { margin:0 0 8px; font-size:14.5px;}
+.how { margin:0; padding-left:20px; font-size:14px; color:#2c3532;}
+.how li { margin:3px 0;}
+.note { margin:8px 0 0; font-size:13px; color:var(--sub);}
+.flow { display:flex; flex-direction:column; gap:0; margin-top:6px;}
+.step { background:var(--teal-soft); border-radius:10px; padding:10px 14px; font-size:14px;}
+.step b { color:var(--teal-dark);}
+.arrow { text-align:center; color:var(--teal); font-size:16px; line-height:1.4;}
+.twocol { display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+@media (max-width:560px) {.twocol { grid-template-columns:1fr;}}
+.mini { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:14px 16px;}
+.mini h3 { margin:0 0 4px; font-size:15px;}
+.mini p { margin:0; font-size:13.5px; color:#2c3532;}
+.warn { background:var(--amber-bg); border:1px solid #ecd9ac; border-radius:12px; padding:14px 16px; font-size:14px; margin-top:12px;}
+.warn b { color:var(--amber);}
+footer { text-align:center; color:var(--sub); font-size:12px; padding:24px 16px 32px;}
+.toc { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:12px 16px; font-size:14px;}
+.toc a { color:var(--teal-dark); text-decoration:none; display:inline-block; margin:2px 10px 2px 0;}
+</style>
+</head>
+<body>
+<header>
+<div class="app">WIZY 通信業務</div>
+<h1>使い方ガイド</h1>
+<p>公式LINE「Wizy_通信管理者用」の管理メニューの使い方です。</p>
+</header>
+<main>
+
+<h2>この仕組みの全体像</h2>
+<div class="twocol">
+<div class="mini">
+<h3>Wizy_通信業務管理</h3>
+<p>スタッフ・グループ用。実績報告の受付、起床フォーマットの送信、シフト連絡など、日々の運用はこちらのアカウントとグループで行われます。</p>
+</div>
+<div class="mini">
+<h3>Wizy_通信管理者用（このアカウント）</h3>
+<p>管理者専用。状況の確認、承認、シフト表やスタッフの管理、取引先への共有設定はここから行います。管理系の通知もここに届きます。</p>
+</div>
+</div>
+<div class="card">
+<h3>起床・出発・入店の取引先への共有</h3>
+<p class="about">起床グループに流れる累積リストをもとに、その日のアサイン先の会社へだけ自動で知らせます。</p>
+<div class="flow">
+<div class="step"><b>1.</b> 起床グループにリストが投稿される（名前の横の丸が増えていく形式）</div>
+<div class="arrow">▼</div>
+<div class="step"><b>2.</b> 丸の数が増えた人・段階だけを検知（1つ＝起床、2つ＝出発、3つ＝入店）</div>
+<div class="arrow">▼</div>
+<div class="step"><b>3.</b> その日のシフト表のセルの色から、アサイン先の会社を判定</div>
+<div class="arrow">▼</div>
+<div class="step"><b>4.</b> その会社のグループへ「○○さん／場所：○○／起床しました（時刻）」を送信</div>
+</div>
+<p class="note">同じ会社のグループには、1人・1段階ごとに1通ずつ、実際に起きた順に届きます。白（アサイン先未定）・灰色（稼働なし）の人や、通知OFF・グループ未登録の会社には送りません。</p>
+</div>
+
+<h2>メニューのボタン</h2>
+<div class="toc">
+<a href="#status">状況タブ</a><a href="#manage">管理タブ</a><a href="#work">作業タブ</a><a href="#notify">自動で届く通知</a><a href="#settings">設定</a><a href="#trouble">困ったとき</a>
+</div>
+
+<h2 id="status">状況タブ（見るだけ）</h2>
+
+<div class="card">
+<h3>報告状況 <span class="pill">状況タブ</span></h3>
+<p class="about">今日の実績報告の集計です。誰が・どの商材を・何件報告したかと、合計が返ってきます。</p>
+<ol class="how">
+<li>ボタンを押すだけです。その場で集計して返します。</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>未報告者 <span class="pill">状況タブ</span></h3>
+<p class="about">今日シフトが入っていて、まだ実績報告をしていない人の一覧です。</p>
+<ol class="how">
+<li>ボタンを押すだけです。催促を送りたいときは「リマインド送信」を使います。</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>今月の集計 <span class="pill">状況タブ</span></h3>
+<p class="about">今月の個人別の実績合計（商材別）です。</p>
+<ol class="how">
+<li>ボタンを押すだけです。</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>通数残量 <span class="pill">状況タブ</span></h3>
+<p class="about">会社の全公式LINE（5アカウント）の、今月の送信通数と残り通数です。プランの上限に近づいていないかの確認に使います。</p>
+<ol class="how">
+<li>ボタンを押すだけです。各アカウントの最新値をその場で取得します。</li>
+</ol>
+</div>
+
+<h2 id="manage">管理タブ（承認と催促）</h2>
+
+<div class="card">
+<h3>承認待ち <span class="pill">管理タブ</span></h3>
+<p class="about">承認が必要な作業の一覧です。対象は「実績タブの作成」と「翌月のシフトシート作成」で、新しいスタッフの報告や月替わりで自動的に発生します。</p>
+<ol class="how">
+<li>発生した時点で、このトークに承認カードが自動で届きます。</li>
+<li>カードの「承認する」「却下する」を押すだけです（「承認1」のように番号を送っても処理できます）。</li>
+<li>たまっている分は、このボタンからいつでも一覧を表示できます。</li>
+</ol>
+<p class="note">承認すると、タブやシートが実際に作成されます。誰が承認しても同じ結果になります。</p>
+</div>
+
+<div class="card">
+<h3>管理者申請 <span class="pill">管理タブ</span></h3>
+<p class="about">新しい管理者の登録申請を確認する場所です。管理者は複数人登録できます。</p>
+<ol class="how">
+<li>申請者が「管理者として登録する」から登録コードと名前を送ると、既存の管理者に申請カードが届きます。</li>
+<li>カードで承認すると、その人に管理メニューが付いて、通知も届くようになります。</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>リマインド送信 <span class="pill">管理タブ</span></h3>
+<p class="about">今日まだ報告していない人へ、実績報告グループで催促のメッセージを送ります。</p>
+<ol class="how">
+<li>ボタンを押すと、対象者の一覧と確認が出ます。</li>
+<li>「送信する」を押すとグループへ送信されます。</li>
+</ol>
+</div>
+
+<div class="card">
+<h3>報告の取り消し <span class="pill">管理タブ</span></h3>
+<p class="about">今日の実績報告を取り消します。報告データ・個人タブ・全体集計が、取り消し前の状態に戻ります。</p>
+<ol class="how">
+<li>ボタンを押すと今日の報告の一覧が出ます。</li>
+<li>取り消す報告の番号を送り、確認で実行します。</li>
+</ol>
+</div>
+
+<h2 id="work">作業タブ（シートと人の管理）</h2>
+
+<div class="card">
+  <h3>シフト管理 <span class="pill">作業タブ</span></h3>
+  <p class="about">イベントシフト表の操作です。4つの作業があります。</p>
+  <ol class="how">
+    <li><b>翌月シート作成</b>：来月分のシートを今月の形式で作成します（承認制の場合は承認待ちに入ります）。</li>
+    <li><b>シフト記入・変更</b>：ブロック→月→スタッフ→日→内容の順に選んでタップしていくだけで記入できます。店舗名を入れる場合はその場で入力します。</li>
+    <li><b>スタッフ列を追加</b>：名前を送ると、イベントと研修の両方に列が追加されます（枠線・幅・稼働日数の数式つき）。</li>
+    <li><b>スタッフ列を削除</b>：一覧から番号で選びます。列はシート全体で共通のため、イベントと研修の両方から消えます。その列の記入内容も消えるのでご注意ください。</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h3>スタッフ管理 <span class="pill">作業タブ</span></h3>
+  <p class="about">スタッフの追加と、実績まわりの管理です。4つの作業があります。</p>
+  <ol class="how">
+    <li><b>スタッフを追加</b>：名前を送るだけで、LINE ID管理への追加・実績タブの作成・シフト表（イベント／研修）への列追加をまとめて行います。LINE IDは本人の初回報告で自動登録されます。</li>
+    <li><b>実績タブを作成</b>：実績ファイルに個人タブだけを追加します（既存タブのコピー）。</li>
+    <li><b>ID未登録者を確認</b>：LINE IDがまだ登録されていないスタッフの一覧です。</li>
+    <li><b>月間集計を再計算</b>：全体月間実績を、報告データから計算し直します。数字が合わないと感じたときに使います。</li>
+  </ol>
+  <p class="note">スタッフの追加作業は、この「スタッフを追加」ひとつで完結します。シートを直接触る必要はありません。</p>
+</div>
+
+<div class="card">
+  <h3>取引先グループ <span class="pill">作業タブ</span></h3>
+  <p class="about">起床・出発・入店の共有先（取引先）の管理です。会社ごとの登録状況と、通知のON・OFFが一覧で出ます。</p>
+  <ol class="how">
+    <li><b>通知のON・OFF</b>：会社を番号で選ぶと、その会社への共有をまるごと止める／再開できます（起床・出発・入店の個別設定はありません）。</li>
+    <li><b>取引先を追加</b>：会社名と、シフト表でその会社に使う色（6桁の16進数、例：FF9900）を送ります。色が他の会社と重なる場合は追加できません。追加後は、シフト表の凡例にも同じ色で会社名を入れてください。</li>
+    <li><b>取引先を削除</b>：番号で選んで削除します。グループの紐付けも解除され、共有は止まります。</li>
+    <li><b>グループの紐付け</b>：ボット（Wizy_通信業務管理）を会社のグループに追加すると、管理者に会社選択のカードが自動で届きます。会社を選ぶだけで紐付け完了です。</li>
+  </ol>
+  <p class="note">会社の判定はシフト表のセルの色で行います。色と会社の対応はこのマスタが正本です。</p>
+</div>
+
+<div class="card">
+  <h3>シフト未提出 <span class="pill">作業タブ</span></h3>
+  <p class="about">来月分のシフトをまだ提出していない人の確認です。毎月10日の朝9時にも、自動でお知らせが届きます。</p>
+  <ol class="how">
+    <li>ボタンを押すと未提出者の一覧が出ます。</li>
+    <li>そのまま番号を返すと、その人だけに業務グループでメンション送信できます。「全員にメンション送信」のボタンもあります。</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h3>スプレッドシート <span class="pill">作業タブ</span></h3>
+  <p class="about">実績ファイルとイベントシフト表をブラウザで開きます。直接シートを確認・編集したいとき用です。</p>
+  <ol class="how">
+    <li>ボタンを押して、開きたいシートを選ぶだけです。</li>
+  </ol>
+</div>
+
+<h2 id="notify">自動で届く通知</h2>
+<div class="card">
+  <p class="about">次のことが起きると、このアカウントに自動で通知が届きます。日常の確認は不要です。</p>
+  <ol class="how">
+    <li><b>承認カード</b>：実績タブの作成・翌月シートの作成が必要になったとき</li>
+    <li><b>管理者登録の申請</b>：新しい管理者が登録を申請したとき</li>
+    <li><b>IDの登録・競合</b>：スタッフのLINE IDが自動登録されたとき／別のIDで報告があり競合したとき（競合はカードで解消できます）</li>
+    <li><b>取引先共有のエラー</b>：送信に失敗したとき／シフトの色がマスタにないとき／登録済みグループからボットが退出したとき（通常の「送らない」判断は通知されません）</li>
+    <li><b>シフト未提出</b>：毎月10日の朝9時、来月分の未提出者</li>
+    <li><b>通数の警告</b>：公式LINEの送信通数が上限に近づいたとき</li>
+  </ol>
+</div>
+
+<h2 id="settings">設定（使い方・設定のカード）</h2>
+<div class="card">
+  <ol class="how">
+    <li><b>詳しい使い方</b>：このページを開きます。</li>
+    <li><b>管理者一覧</b>：登録されている管理者の確認と、他の管理者の解除ができます。</li>
+    <li><b>登録コード</b>：新しい管理者の登録に使う6桁コードの確認と変更ができます。コードは管理者以外に共有しないでください。</li>
+    <li><b>自分の登録を解除する</b>：自分の管理者登録を外します。メニューが使えなくなり、通知も届かなくなります（再登録には登録コードと承認が必要です）。</li>
+  </ol>
+</div>
+
+<h2 id="trouble">困ったとき</h2>
+<div class="warn">
+  <b>入力の途中でやめたくなったら</b>：「キャンセル」と送ると中断できます。途中でリッチメニューのボタンを押しても、そのままその機能に切り替わります（入力待ちは自動で破棄されます）。入力待ちのまま10分経つと、自動で無効になります。
+</div>
+<div class="card">
+  <ol class="how">
+    <li><b>数字が合わない</b>：「スタッフ管理」→「月間集計を再計算」を試してください。</li>
+    <li><b>取引先に共有が届かない</b>：「取引先グループ」で、その会社が「グループ登録済み・通知ON」になっているか確認してください。届かない理由がエラーの場合は、このアカウントに通知が届いているはずです。</li>
+    <li><b>新しい会社と取引が始まった</b>：「取引先グループ」→「取引先を追加」で会社と色を登録し、シフト表の凡例にも同じ色を入れてから、ボットを会社のグループに追加してください。</li>
+    <li><b>新しいスタッフが入った</b>：「スタッフ管理」→「スタッフを追加」で名前を送るだけです。あとは本人の初回報告でIDが自動登録されます。</li>
+  </ol>
+</div>
+
+</main>
+<footer>Wizy_通信管理者用 使い方ガイド</footer>
+</body>
+</html>
